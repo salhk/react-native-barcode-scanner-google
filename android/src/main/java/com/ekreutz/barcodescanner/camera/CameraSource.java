@@ -368,21 +368,25 @@ public class CameraSource {
             }
 
             mCamera = createCamera();
+            try {
+                // SurfaceTexture was introduced in Honeycomb (11), so if we are running and
+                // old version of Android. fall back to use SurfaceView.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    mDummySurfaceTexture = new SurfaceTexture(DUMMY_TEXTURE_NAME);
+                    mCamera.setPreviewTexture(mDummySurfaceTexture);
+                } else {
+                    mDummySurfaceView = new SurfaceView(mContext);
+                    mCamera.setPreviewDisplay(mDummySurfaceView.getHolder());
+                }
+                mCamera.startPreview();
 
-            // SurfaceTexture was introduced in Honeycomb (11), so if we are running and
-            // old version of Android. fall back to use SurfaceView.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                mDummySurfaceTexture = new SurfaceTexture(DUMMY_TEXTURE_NAME);
-                mCamera.setPreviewTexture(mDummySurfaceTexture);
-            } else {
-                mDummySurfaceView = new SurfaceView(mContext);
-                mCamera.setPreviewDisplay(mDummySurfaceView.getHolder());
+                mProcessingThread = new Thread(mFrameProcessor);
+                mFrameProcessor.setActive(true);
+                mProcessingThread.start();
             }
-            mCamera.startPreview();
-
-            mProcessingThread = new Thread(mFrameProcessor);
-            mFrameProcessor.setActive(true);
-            mProcessingThread.start();
+            catch (Exception ex) {
+                
+            }
         }
         return this;
     }
@@ -400,14 +404,18 @@ public class CameraSource {
             if (mCamera != null) {
                 return this;
             }
+            try {
+                mCamera = createCamera();
+                mCamera.setPreviewDisplay(surfaceHolder);
+                mCamera.startPreview();
 
-            mCamera = createCamera();
-            mCamera.setPreviewDisplay(surfaceHolder);
-            mCamera.startPreview();
-
-            mProcessingThread = new Thread(mFrameProcessor);
-            mFrameProcessor.setActive(true);
-            mProcessingThread.start();
+                mProcessingThread = new Thread(mFrameProcessor);
+                mFrameProcessor.setActive(true);
+                mProcessingThread.start();
+            }
+            catch(Exception ex) {
+                
+            }
         }
         return this;
     }
