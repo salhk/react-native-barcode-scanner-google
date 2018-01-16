@@ -53,6 +53,7 @@ public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFo
     private CameraSourcePreview mPreview;
     private BarcodeDetector mBarcodeDetector;
     private boolean mIsPaused = true;
+    private int preferredFocusMode = 0;
 
     private int mBarcodeTypes = 0; // 0 for all supported types
 
@@ -220,22 +221,27 @@ public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFo
         if (focusMode < 0 || focusMode > 2) {
             focusMode = 0;
         }
-        boolean supported = true;
-        Camera.Parameters parameters = mCameraSource.getParameters();
-        List<String> focusModes = parameters.getSupportedFocusModes();
-        if(focusModes.contains(PREFERRED_FOCUS_MODES[focusMode])){
-            return mCameraSource != null && mCameraSource.setFocusMode(PREFERRED_FOCUS_MODES[focusMode]);
+        preferredFocusMode = focusMode;
+        if (mCameraSource == null) {
+            return false;
         }
-        else {
-            String fm = "";
-            if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)){
-                fm = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
-            } 
-            else if(focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
-                fm = Camera.Parameters.FOCUS_MODE_AUTO;
-            } 
-            return mCameraSource != null && mCameraSource.setFocusMode(fm);
-        }         
+        return mCameraSource != null && mCameraSource.setFocusMode(PREFERRED_FOCUS_MODES[focusMode]);
+//        boolean supported = true;
+//        Camera.Parameters parameters = mCameraSource.getParameters();
+//        List<String> focusModes = parameters.getSupportedFocusModes();
+//        if(focusModes.contains(PREFERRED_FOCUS_MODES[focusMode])) {
+//            return mCameraSource != null && mCameraSource.setFocusMode(PREFERRED_FOCUS_MODES[focusMode]);
+//        }
+//        else {
+//            String fm = "";
+//            if(focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)){
+//                fm = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+//            }
+//            else if(focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
+//                fm = Camera.Parameters.FOCUS_MODE_AUTO;
+//            }
+//            return mCameraSource != null && mCameraSource.setFocusMode(fm);
+//        }
     }
 
     /**
@@ -310,6 +316,7 @@ public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFo
             try {
                 mPreview.start(mCameraSource);
                 mIsPaused = false;
+                setFocusMode(preferredFocusMode);
             } catch (IOException e) {
                 mCameraSource.release();
                 mCameraSource = null;
