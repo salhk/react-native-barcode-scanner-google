@@ -29,6 +29,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
+import java.util.List;
 
 public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFocusCallback, MultiProcessor.Factory<Barcode> {
 
@@ -220,8 +221,8 @@ public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFo
             focusMode = 0;
         }
         boolean supported = true;
-        Parameters parameters = mCameraSource.getParameters();
-        List<String>    focusModes = parameters.getSupportedFocusModes();
+        Camera.Parameters parameters = mCameraSource.getParameters();
+        List<String> focusModes = parameters.getSupportedFocusModes();
         if(focusModes.contains(PREFERRED_FOCUS_MODES[focusMode])){
             return mCameraSource != null && mCameraSource.setFocusMode(PREFERRED_FOCUS_MODES[focusMode]);
         }
@@ -233,7 +234,7 @@ public class BarcodeScannerView extends ViewGroup implements CameraSource.AutoFo
             else if(focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)){
                 fm = Camera.Parameters.FOCUS_MODE_AUTO;
             } 
-            return mCameraSource != null && mCameraSource.setFocusMode(focusMode);
+            return mCameraSource != null && mCameraSource.setFocusMode(fm);
         }         
     }
 
